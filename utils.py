@@ -54,11 +54,18 @@ def get_mask(image, color, tolerance=20, fill_value=255):
     return fill_value - mask_u8  # inverse the image
   
 
-def count_pixels(image, color, tolerance=20):
+def count_pixels(image, color):
     delta = get_rgb_delta(image, color)
     delta_flatten = delta.flatten()
     num_matches = (np.abs(delta_flatten) == 0).sum()
     return num_matches
+
+
+def morph_dilate(image, kernel_size=5, iterations=1):
+    kernel = np.ones((kernel_size, kernel_size))
+    dilated = cv2.dilate(image, kernel, iterations=iterations)
+    return dilated
+    
 
 
 def morph_open(image, kernel_size=5):

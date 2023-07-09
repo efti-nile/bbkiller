@@ -1,14 +1,13 @@
-import cv2
-import requests
 import glob
-import os
-import utils
 import logging
+import os
+
+import cv2
+import dotenv
 import requests
-import re
 
 import cfg
-
+import utils
 
 def find_bboxes(frames, bbox_colors, out_folder, theshold=15):
     utils.create_empty_folder(out_folder)
@@ -17,7 +16,9 @@ def find_bboxes(frames, bbox_colors, out_folder, theshold=15):
         for class_, color in bbox_colors.items():
             count = utils.count_pixels(frame, color)
             if count > theshold:
-                mask = utils.morph_open(utils.get_mask(frame, color))
+                mask = utils.get_mask(frame, color)
+                mask = utils.morph_open(mask)
+                mask = utils.morph_dilate(mask, kernel_size=9, iterations=3)
                 found[frame_idx].append((class_, mask))
                 cv2.imwrite(os.path.join(out_folder, f'F{frame_idx}.png'),
                             frame)
@@ -27,7 +28,7 @@ def find_bboxes(frames, bbox_colors, out_folder, theshold=15):
     return found
 
 
-def process(in_folder, out_folder, video_format='*.mp4'):
+def extract(in_folder, out_folder, video_format='*.mp4'):
     result = []
     videos = glob.glob(os.path.join(in_folder, video_format))
     for no, video in enumerate(videos, 1):
@@ -48,7 +49,7 @@ def repair_image(image_path, mask_path):
             'image_file': ('image.jpg', open(image_path, 'rb'), 'image/jpeg'),
             'mask_file': ('mask.png', open(mask_path, 'rb'), 'image/png')
         },
-        headers = {'x-api-key': '258b656190872bc446da3edbdd9ad3aeef2ca5bafe5372e7197dc6aafb05b63a0ebae53b37fd3e93b4232ff6672848a9'}
+        headers = {'x-api-key': '}
     )
     if (r.ok):
         repaired_path = utils.add_postfix_to_name(image_path, 'R')
@@ -59,21 +60,19 @@ def repair_image(image_path, mask_path):
         r.raise_for_status()
 
 
-def repair_image_folder(image_folder, image_format='png', mask_postfix='M'):
-    for image_path in glob.glob(os.path.join(image_folder, f'**\\*.{image_format}')):
+def repair(folder, image_format='png', mask_postfix='M'):
+    for image_path in glob.glob(os.path.join(folder, f'**\\*.{image_format}')):
         if f'{mask_postfix}.{image_format}' not in image_path \
           and f'R.{image_format}' not in image_path:  # not a mask or repaired
             logging.debug(f'Processing \'{image_path}\'')
             mask_path = utils.add_postfix_to_name(image_path, mask_postfix)
             repair_image(image_path, mask_path)
-        else:
-            pass
 
 def main():
-    process('data\\top_l101',
-            out_folder='data\\frames_l101')
-    # repair_image_folder('data\\out')
-    pass
+    dotenv.load_dotenv()
+    
+    extract('data\\top_l101', 'data\\frames_l101')
+    # repair('data\\frames_l101')
 
 
 if __name__ == '__main__':
