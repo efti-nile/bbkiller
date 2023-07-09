@@ -1,3 +1,7 @@
+# local
+data/
+object_detection/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
