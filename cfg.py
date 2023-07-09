@@ -9,8 +9,3 @@ bbox_colors = {
     'wood': (212, 255, 127),
     'other': (255, 255, 240)        
 }
-
-thresholds = {
-    'l101': 4000,
-    'l201': 8000
-}  # pixels

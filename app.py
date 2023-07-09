@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+import sys
 
 import cv2
 import dotenv
@@ -46,10 +47,10 @@ def extract(in_folder, out_folder, video_format='*.mp4'):
 def repair_image(image_path, mask_path):
     r = requests.post('https://clipdrop-api.co/cleanup/v1',
         files = {
-            'image_file': ('image.jpg', open(image_path, 'rb'), 'image/jpeg'),
+            'image_file': ('image.png', open(image_path, 'rb'), 'image/png'),
             'mask_file': ('mask.png', open(mask_path, 'rb'), 'image/png')
         },
-        headers = {'x-api-key': '}
+        headers = {'x-api-key': os.environ.get('API_TOKEN')}
     )
     if (r.ok):
         repaired_path = utils.add_postfix_to_name(image_path, 'R')
@@ -70,9 +71,10 @@ def repair(folder, image_format='png', mask_postfix='M'):
 
 def main():
     dotenv.load_dotenv()
-    
-    extract('data\\top_l101', 'data\\frames_l101')
-    # repair('data\\frames_l101')
+    if sys.argv[1] == 'extract':
+        extract(f'data\\{sys.argv[2]}', f'data\\{sys.argv[3]}')
+    elif sys.argv[1] == 'repair':
+        repair(f'data\\{sys.argv[2]}')
 
 
 if __name__ == '__main__':
