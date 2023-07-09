@@ -1,5 +1,6 @@
 # local
 data/
+doc/*.png
 object_detection/
 
 # Byte-compiled / optimized / DLL files
