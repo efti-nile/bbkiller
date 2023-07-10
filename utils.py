@@ -6,9 +6,9 @@ import shutil
 import re
 
 
-def get_frames(video):
+def get_frames(video_path):
     frames = []
-    cap = cv2.VideoCapture(video)
+    cap = cv2.VideoCapture(video_path)
     while True:
         ret, frame = cap.read()
         if not ret:
